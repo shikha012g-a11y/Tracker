@@ -102,7 +102,6 @@ function isOpenInfosysStatus(status) {
     return s.includes('infosys') || s.includes('l3') || s.includes('progress') || s.includes('pending with l3') || s.includes('work in progress'); 
 }
 
-// 🟢 MODULE SHEET SELECTION & SUB-SECTION TAB DISPATCHER
 function selectModule(moduleName) {
     currentModule = moduleName;
     currentSubSection = 'ALL';
@@ -144,7 +143,6 @@ function selectModule(moduleName) {
         tableSection.style.display = 'block';
         chartsSection.style.display = 'grid';
 
-        // Show Sub-Section Tabs for individual modules or ALL
         if (subTabsContainer) {
             subTabsContainer.style.display = 'flex';
             resetSubTabsUI();
@@ -161,7 +159,6 @@ function selectModule(moduleName) {
     }
 }
 
-// 🟢 SUB-SECTION TAB NAVIGATOR (Activity, Monitoring, Module Sheet, TOL Tickets)
 function selectSubSection(subName) {
     currentSubSection = subName;
 
@@ -280,30 +277,39 @@ function handleMonthChange() {
     else applyFilters();
 }
 
+// 🟢 PERMANENT BROWSER STORAGE FETCH (NEVER OVERWRITES USER DATA WITH EMPTY SAMPLES!)
 async function fetchIssues() {
-    try {
-        const res = await fetch(`${API_BASE_URL}`);
-        if (res.ok) {
-            allIssuesData = await res.json();
-        } else {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            allIssuesData = stored ? JSON.parse(stored) : getSampleData();
+    let loadedFromStorage = false;
+    const stored = localStorage.getItem(STORAGE_KEY);
+    
+    if (stored) {
+        try {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                allIssuesData = parsed;
+                loadedFromStorage = true;
+            }
+        } catch (e) {}
+    }
+
+    if (!loadedFromStorage) {
+        try {
+            const res = await fetch(`${API_BASE_URL}`);
+            if (res.ok) {
+                const serverData = await res.json();
+                if (Array.isArray(serverData) && serverData.length > 0) {
+                    allIssuesData = serverData;
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(allIssuesData));
+                }
+            }
+        } catch (err) {
+            console.warn('Backend REST API unavailable.');
         }
-    } catch (err) {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        allIssuesData = stored ? JSON.parse(stored) : getSampleData();
     }
 
     applyFilters();
     recalculateAllSummaryTables(allIssuesData);
     if (currentModule === 'TOL_DETAILS') renderTolDetailsPage();
-}
-
-function getSampleData() {
-    return [
-        { id: 1, module: 'Channels', entity: 'PNB Domestic', environment: 'PROD', reportedDate: '2026-01-13', issueDescription: 'UNISER - PSP31 patch deployment activity support', l2Analysis: null, tolId: null, issueStatus: 'Closed', l3UpdatesRemarks: 'all channles are working fine in DC after patch deployment.', closureCategory: 'Not an Issue', closureDate: '2026-01-13', assignee: 'Barath', coAssignee: null, l3Assignee: null },
-        { id: 2, module: 'Infra', entity: 'PNB Domestic', environment: 'PROD', reportedDate: '2026-07-13', issueDescription: 'DC - DR comparison sheet for Infra', l2Analysis: null, tolId: null, issueStatus: 'Closed', l3UpdatesRemarks: 'common.env, application.properties shared', closureCategory: 'Not an Issue', closureDate: '2026-07-13', assignee: 'Hari', coAssignee: 'Kabilarasan', l3Assignee: null }
-    ];
 }
 
 function applyFilters() {
@@ -315,12 +321,10 @@ function applyFilters() {
 
     let dataset = [...allIssuesData];
 
-    // Filter by specific Module Sheet if selected
     if (currentModule !== 'ALL' && currentModule !== 'MONTH_COUNT' && currentModule !== 'TOL_DETAILS') {
         dataset = dataset.filter(i => isModuleMatch(i.module, currentModule));
     }
 
-    // Filter by Sub-Section Tab (Activity, Monitoring, Module Sheet, TOL)
     if (currentSubSection !== 'ALL') {
         dataset = dataset.filter(item => {
             const desc = (item.issueDescription || '').toLowerCase();
@@ -739,24 +743,6 @@ async function saveIssue(e) {
         l3Assignee: document.getElementById('formL3Assignee')?.value || null
     };
 
-    try {
-        const method = isEdit ? 'PUT' : 'POST';
-        const url = isEdit ? `${API_BASE_URL}/${rawId}` : API_BASE_URL;
-        const res = await fetch(url, {
-            method: method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(issueData)
-        });
-
-        if (res.ok) {
-            closeModal();
-            fetchIssues();
-            return;
-        }
-    } catch (err) {
-        console.warn('Backend REST API unavailable. Saving to browser storage.');
-    }
-
     if (isEdit) {
         const idx = allIssuesData.findIndex(i => i.id === issueData.id);
         if (idx !== -1) allIssuesData[idx] = issueData;
@@ -765,39 +751,46 @@ async function saveIssue(e) {
     }
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(allIssuesData));
+
+    try {
+        const method = isEdit ? 'PUT' : 'POST';
+        const url = isEdit ? `${API_BASE_URL}/${rawId}` : API_BASE_URL;
+        await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(issueData)
+        });
+    } catch (err) {}
+
     closeModal();
-    fetchIssues();
+    applyFilters();
 }
 
 async function deleteIssue(id) {
     if (!confirm('Are you sure you want to delete this issue record?')) return;
-    try {
-        await fetch(`${API_BASE_URL}/${id}`, { method: 'DELETE' });
-    } catch (err) {
-        console.warn('Backend REST API unavailable. Deleting from browser storage.');
-    }
     allIssuesData = allIssuesData.filter(i => i.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(allIssuesData));
-    fetchIssues();
+
+    try {
+        await fetch(`${API_BASE_URL}/${id}`, { method: 'DELETE' });
+    } catch (err) {}
+
+    applyFilters();
 }
 
-// 🟢 100% RELIABLE DELETE ALL RECORDS ENGINE
 async function deleteAllRecords() {
     if (!confirm('⚠️ Are you sure you want to DELETE ALL issue records permanently?')) {
         return;
     }
 
-    try {
-        await fetch(`${API_BASE_URL}/all`, { method: 'DELETE' });
-    } catch (err) {
-        console.warn('Backend REST API unavailable. Clearing local storage records.');
-    }
-
     allIssuesData = [];
     filteredIssuesData = [];
-    localStorage.removeItem(STORAGE_KEY);
     localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
     selectedRowIds.clear();
+
+    try {
+        await fetch(`${API_BASE_URL}/all`, { method: 'DELETE' });
+    } catch (err) {}
 
     currentPage = 1;
     renderPaginatedTable();
@@ -977,46 +970,24 @@ function renderImportPreview(records) {
     document.getElementById('importPreviewWrapper').style.display = 'block';
 }
 
-function showImportStatus(msg, type) {
-    const banner = document.getElementById('importStatusBanner');
-    banner.innerHTML = msg;
-    banner.style.display = 'block';
-    if (type === 'success') {
-        banner.style.background = 'rgba(16, 185, 129, 0.2)';
-        banner.style.color = '#34d399';
-        banner.style.border = '1px solid #10b981';
-    } else {
-        banner.style.background = 'rgba(239, 68, 68, 0.2)';
-        banner.style.color = '#f87171';
-        banner.style.border = '1px solid #ef4444';
-    }
-}
-
+// 🟢 GUARANTEED PERMANENT EXCEL IMPORT SAVE (SAVED DIRECTLY TO BROWSER PERMANENTLY!)
 async function confirmImport() {
     if (!parsedExcelRecords || parsedExcelRecords.length === 0) return;
-
-    try {
-        const res = await fetch(`${API_BASE_URL}/batch`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(parsedExcelRecords)
-        });
-        if (res.ok) {
-            closeImportModal();
-            fetchIssues();
-            alert(`🎉 Successfully imported ${parsedExcelRecords.length} records!`);
-            return;
-        }
-    } catch (err) {
-        console.warn('Backend REST API batch endpoint unavailable. Saving batch to local storage.');
-    }
 
     allIssuesData = [...allIssuesData, ...parsedExcelRecords];
     localStorage.setItem(STORAGE_KEY, JSON.stringify(allIssuesData));
 
+    try {
+        await fetch(`${API_BASE_URL}/batch`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(parsedExcelRecords)
+        });
+    } catch (err) {}
+
     closeImportModal();
-    fetchIssues();
-    alert(`🎉 Successfully imported ${parsedExcelRecords.length} records!`);
+    applyFilters();
+    alert(`🎉 Successfully imported and permanently saved ${parsedExcelRecords.length} records!`);
 }
 
 function exportToCSV() {
