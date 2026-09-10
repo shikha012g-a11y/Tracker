@@ -133,11 +133,11 @@ tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
 
 .modal { display: none !important; pointer-events: none !important; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.75); z-index: 1000; justify-content: center; align-items: center; }
 .modal.show { display: flex !important; pointer-events: auto !important; }
-.modal-content { width: 90%; max-width: 700px; max-height: 90vh; overflow-y: auto; position: relative; }
-.close-btn { position: absolute; right: 1.2rem; top: 1rem; font-size: 1.5rem; cursor: pointer; }
+.modal-content { width: 90%; max-width: 800px; max-height: 85vh; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+.close-btn { position: absolute; right: 1.2rem; top: 1rem; font-size: 1.5rem; cursor: pointer; z-index: 20; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
 .full-width { grid-column: span 2; }
 .form-group { display: flex; flex-direction: column; gap: 0.3rem; }
 .form-group label { font-size: 0.8rem; color: var(--text-sub); }
-.form-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; }
+.form-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; flex-shrink: 0; }
 .error-banner { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #f87171; padding: 0.8rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.85rem; }
