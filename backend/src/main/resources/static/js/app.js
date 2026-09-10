@@ -277,7 +277,6 @@ function handleMonthChange() {
     else applyFilters();
 }
 
-// 🟢 PERMANENT BROWSER STORAGE FETCH (NEVER OVERWRITES USER DATA WITH EMPTY SAMPLES!)
 async function fetchIssues() {
     let loadedFromStorage = false;
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -803,12 +802,19 @@ async function deleteAllRecords() {
     alert('🗑️ All records have been successfully deleted.');
 }
 
+// 🟢 ALWAYS KEEP SAVE BUTTON VISIBLE IN IMPORT MODAL AT ALL TIMES
 function openImportModal() {
     parsedExcelRecords = [];
     document.getElementById('excelFileInput').value = '';
     document.getElementById('importPreviewWrapper').style.display = 'none';
-    document.getElementById('confirmImportBtn').style.display = 'none';
     document.getElementById('importStatusBanner').style.display = 'none';
+    
+    const saveBtn = document.getElementById('confirmImportBtn');
+    if (saveBtn) {
+        saveBtn.style.display = 'inline-flex';
+        saveBtn.innerText = '💾 Save & Import Records to DB';
+    }
+    
     document.getElementById('importModal').classList.add('show');
 }
 
@@ -937,8 +943,13 @@ function handleExcelFileSelect(event) {
 
             parsedExcelRecords = combinedRecords;
             renderImportPreview(parsedExcelRecords);
-            showImportStatus(`✅ Successfully parsed ${parsedExcelRecords.length} records across Excel sheet tabs (${workbook.SheetNames.join(', ')}). Click below to import.`, 'success');
-            document.getElementById('confirmImportBtn').style.display = 'inline-block';
+            showImportStatus(`✅ Successfully parsed ${parsedExcelRecords.length} records across Excel sheet tabs (${workbook.SheetNames.join(', ')}). Click below to save.`, 'success');
+            
+            const saveBtn = document.getElementById('confirmImportBtn');
+            if (saveBtn) {
+                saveBtn.style.display = 'inline-flex';
+                saveBtn.innerText = `💾 Save & Import ${parsedExcelRecords.length} Records to DB`;
+            }
 
         } catch (err) {
             showImportStatus('❌ Failed to read Excel workbook: ' + err.message, 'danger');
@@ -970,9 +981,11 @@ function renderImportPreview(records) {
     document.getElementById('importPreviewWrapper').style.display = 'block';
 }
 
-// 🟢 GUARANTEED PERMANENT EXCEL IMPORT SAVE (SAVED DIRECTLY TO BROWSER PERMANENTLY!)
 async function confirmImport() {
-    if (!parsedExcelRecords || parsedExcelRecords.length === 0) return;
+    if (!parsedExcelRecords || parsedExcelRecords.length === 0) {
+        alert('⚠️ Please select an Excel or CSV file to import first.');
+        return;
+    }
 
     allIssuesData = [...allIssuesData, ...parsedExcelRecords];
     localStorage.setItem(STORAGE_KEY, JSON.stringify(allIssuesData));
