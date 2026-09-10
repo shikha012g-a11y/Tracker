@@ -93,7 +93,7 @@
             <button type="button" class="module-card" onclick="window.selectModule('FAS')"><span class="mod-icon">📁</span> FAS</button>
         </div>
 
-        <!-- 🟢 SUB-SECTION TAB NAVIGATION (Activity, Monitoring - Daily Sheet, Module Sheet, TOL Tickets) -->
+        <!-- SUB-SECTION TAB NAVIGATION -->
         <div class="sub-section-tabs" id="subSectionTabs" style="display: none; margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--card-border);">
             <span style="font-size: 0.85rem; color: var(--text-sub); margin-right: 0.8rem; font-weight: 600;">Sub-Sections:</span>
             <button type="button" class="sub-tab-btn active" id="subTabAll" onclick="window.selectSubSection('ALL')">🌐 All Section Data</button>
@@ -104,7 +104,7 @@
         </div>
     </section>
 
-    <!-- 🎫 DEDICATED "TOL DETAILS" SECTION -->
+    <!-- DEDICATED "TOL DETAILS" SECTION -->
     <section class="card" id="tolDetailsPageSection" style="display: none;">
         <div class="month-count-header">
             <h2>🎫 TOL Details & Ticket Tracking Dashboard</h2>
@@ -565,48 +565,51 @@
     </div>
 </div>
 
-<!-- Excel Import Modal -->
+<!-- 🟢 ENHANCED EXCEL IMPORT MODAL WITH STICKY SAVE BUTTON -->
 <div id="importModal" class="modal">
-    <div class="modal-content card" style="max-width: 850px;">
+    <div class="modal-content card" style="max-width: 900px; display: flex; flex-direction: column; max-height: 85vh; padding-bottom: 0;">
         <span class="close-btn" onclick="window.closeImportModal()">&times;</span>
         <h2>📤 Import Issues from Excel / CSV</h2>
         <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 1rem;">
             Upload an Excel (.xlsx, .xls) or CSV file. All matching rows will be validated and imported into your database.
         </p>
 
-        <div class="file-drop-zone" onclick="document.getElementById('excelFileInput').click()">
-            <div style="font-size: 2rem; margin-bottom: 0.5rem;">📄</div>
-            <strong>Click to browse or drag & drop Excel file here</strong>
-            <span style="font-size: 0.75rem; color: var(--text-sub); display: block; margin-top: 4px;">Supports .xlsx, .xls, .csv</span>
-            <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;" onchange="window.handleExcelFileSelect(event)">
-        </div>
+        <div style="flex: 1; overflow-y: auto; padding-right: 4px;">
+            <div class="file-drop-zone" onclick="document.getElementById('excelFileInput').click()">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📄</div>
+                <strong>Click to browse or drag & drop Excel file here</strong>
+                <span style="font-size: 0.75rem; color: var(--text-sub); display: block; margin-top: 4px;">Supports .xlsx, .xls, .csv</span>
+                <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;" onchange="window.handleExcelFileSelect(event)">
+            </div>
 
-        <div id="importStatusBanner" style="display: none; margin-top: 1rem; padding: 0.8rem; border-radius: 6px; font-size: 0.85rem;"></div>
+            <div id="importStatusBanner" style="display: none; margin-top: 1rem; padding: 0.8rem; border-radius: 6px; font-size: 0.85rem;"></div>
 
-        <div id="importPreviewWrapper" style="display: none; margin-top: 1rem;">
-            <h3 style="font-size: 0.95rem; color: #60a5fa; margin-bottom: 0.5rem;">Parsed Rows Preview (<span id="parsedRowsCount">0</span> records)</h3>
-            <div class="table-wrapper" style="max-height: 220px; overflow-y: auto;">
-                <table class="excel-domain-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Module</th>
-                            <th>Entity</th>
-                            <th>Env</th>
-                            <th>Reported Date</th>
-                            <th>Description</th>
-                            <th>Status</th>
-                            <th>Assignee</th>
-                        </tr>
-                    </thead>
-                    <tbody id="importPreviewBody"></tbody>
-                </table>
+            <div id="importPreviewWrapper" style="display: none; margin-top: 1rem;">
+                <h3 style="font-size: 0.95rem; color: #60a5fa; margin-bottom: 0.5rem;">Parsed Rows Preview (<span id="parsedRowsCount">0</span> records)</h3>
+                <div class="table-wrapper" style="max-height: 250px; overflow-y: auto;">
+                    <table class="excel-domain-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Module</th>
+                                <th>Entity</th>
+                                <th>Env</th>
+                                <th>Reported Date</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Assignee</th>
+                            </tr>
+                        </thead>
+                        <tbody id="importPreviewBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <div class="form-actions" style="margin-top: 1.5rem;">
+        <!-- 🟢 STICKY ALWAYS-VISIBLE FOOTER SAVE BUTTON BAR -->
+        <div class="form-actions" style="margin-top: 1rem; padding: 1rem 0; border-top: 1px solid var(--card-border); background: var(--card-bg); sticky: bottom;">
             <button type="button" class="btn btn-secondary" onclick="window.closeImportModal()">Cancel</button>
-            <button type="button" class="btn btn-primary" id="confirmImportBtn" style="display: none;" onclick="window.confirmImport()">Import Records to DB</button>
+            <button type="button" class="btn btn-primary" id="confirmImportBtn" style="display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, #10b981, #059669); font-size: 0.95rem; padding: 0.7rem 1.5rem;" onclick="window.confirmImport()">💾 Save & Import Records to DB</button>
         </div>
     </div>
 </div>
