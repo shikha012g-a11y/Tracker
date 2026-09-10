@@ -565,16 +565,16 @@
     </div>
 </div>
 
-<!-- 🟢 ENHANCED EXCEL IMPORT MODAL WITH STICKY SAVE BUTTON -->
+<!-- 🟢 GUARANTEED ALWAYS-VISIBLE SAVE BUTTON IN EXCEL IMPORT MODAL -->
 <div id="importModal" class="modal">
-    <div class="modal-content card" style="max-width: 900px; display: flex; flex-direction: column; max-height: 85vh; padding-bottom: 0;">
+    <div class="modal-content card" style="max-width: 900px; display: flex; flex-direction: column; max-height: 85vh; padding-bottom: 0; overflow: hidden;">
         <span class="close-btn" onclick="window.closeImportModal()">&times;</span>
         <h2>📤 Import Issues from Excel / CSV</h2>
-        <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 1rem;">
+        <p style="color: var(--text-sub); font-size: 0.85rem; margin-bottom: 0.8rem;">
             Upload an Excel (.xlsx, .xls) or CSV file. All matching rows will be validated and imported into your database.
         </p>
 
-        <div style="flex: 1; overflow-y: auto; padding-right: 4px;">
+        <div style="flex: 1; overflow-y: auto; padding-right: 4px; margin-bottom: 0.5rem;">
             <div class="file-drop-zone" onclick="document.getElementById('excelFileInput').click()">
                 <div style="font-size: 2rem; margin-bottom: 0.5rem;">📄</div>
                 <strong>Click to browse or drag & drop Excel file here</strong>
@@ -606,10 +606,10 @@
             </div>
         </div>
 
-        <!-- 🟢 STICKY ALWAYS-VISIBLE FOOTER SAVE BUTTON BAR -->
-        <div class="form-actions" style="margin-top: 1rem; padding: 1rem 0; border-top: 1px solid var(--card-border); background: var(--card-bg); sticky: bottom;">
+        <!-- 🟢 GUARANTEED ALWAYS-VISIBLE FOOTER SAVE BUTTON BAR -->
+        <div class="form-actions" id="importModalFooter" style="padding: 1rem; border-top: 1px solid var(--card-border); background: #1e293b; display: flex; justify-content: flex-end; gap: 1rem; width: 100%; border-radius: 0 0 12px 12px;">
             <button type="button" class="btn btn-secondary" onclick="window.closeImportModal()">Cancel</button>
-            <button type="button" class="btn btn-primary" id="confirmImportBtn" style="display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, #10b981, #059669); font-size: 0.95rem; padding: 0.7rem 1.5rem;" onclick="window.confirmImport()">💾 Save & Import Records to DB</button>
+            <button type="button" class="btn btn-primary" id="confirmImportBtn" style="display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, #10b981, #059669); font-size: 0.95rem; padding: 0.7rem 1.5rem; color: #ffffff; font-weight: 700; border: none; cursor: pointer;" onclick="window.confirmImport()">💾 Save & Import Records to DB</button>
         </div>
     </div>
 </div>
